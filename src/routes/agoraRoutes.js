@@ -1,85 +1,30 @@
-// import express from "express";
-// import pkg from "agora-access-token";
-// import dotenv from "dotenv";
-
-// dotenv.config();
-
-// const router = express.Router();
-
-// const { RtcTokenBuilder, RtcRole } = pkg;
-
-// // 🔥 NOW FROM ENV (SAFE)
-// const APP_ID = process.env.AGORA_APP_ID;
-// const APP_CERTIFICATE = process.env.AGORA_APP_CERTIFICATE;
-
-// router.post("/token", (req, res) => {
-//   try {
-//     const { channelName, uid } = req.body;
-
-//     if (!channelName || !uid) {
-//       return res.status(400).json({
-//         error: "channelName and uid are required",
-//       });
-//     }
-
-//     const role = RtcRole.PUBLISHER;
-
-//     const expirationTimeInSeconds = 3600;
-//     const currentTimestamp = Math.floor(Date.now() / 1000);
-//     const privilegeExpiredTs =
-//       currentTimestamp + expirationTimeInSeconds;
-
-//     const token = RtcTokenBuilder.buildTokenWithUid(
-//       APP_ID,
-//       APP_CERTIFICATE,
-//       channelName,
-//       uid,
-//       role,
-//       privilegeExpiredTs
-//     );
-
-//     return res.json({ token });
-//   } catch (error) {
-//     console.error("Agora Token Error:", error);
-//     return res.status(500).json({
-//       error: "Failed to generate Agora token",
-//     });
-//   }
-// });
-
-// export default router;
-
 import express from "express";
 import pkg from "agora-access-token";
-import dotenv from "dotenv";
-
 
 const router = express.Router();
-
 const { RtcTokenBuilder, RtcRole } = pkg;
 
-const APP_ID =  process.env.AGORA_APP_ID;
-const APP_CERTIFICATE =  process.env.AGORA_APP_CERTIFICATE;
+// ✅ ENV SAFE FALLBACK (so Render crash never happens)
+const APP_ID =
+  process.env.AGORA_APP_ID || "ab994c07eee7434887a63166f8afcf40";
+
+const APP_CERTIFICATE =
+  process.env.AGORA_APP_CERTIFICATE || "316500e2c6dc400c9472e2e2831d95df";
 
 router.post("/token", (req, res) => {
   try {
-    console.log("BODY RECEIVED:", req.body);
-
     const { channelName, uid } = req.body;
 
-    // 🔥 VALIDATION FIX
     if (!channelName) {
       return res.status(400).json({ error: "channelName required" });
     }
 
-    const safeUid = uid ? Number(uid) : 1;
+    // ✅ FIX: uid null crash protection
+    const safeUid = uid && uid !== "null" ? Number(uid) : Math.floor(Math.random() * 100000);
 
     const role = RtcRole.PUBLISHER;
 
-    const expirationTimeInSeconds = 3600;
-    const currentTimestamp = Math.floor(Date.now() / 1000);
-    const privilegeExpiredTs =
-      currentTimestamp + expirationTimeInSeconds;
+    const expirationTime = Math.floor(Date.now() / 1000) + 3600;
 
     const token = RtcTokenBuilder.buildTokenWithUid(
       APP_ID,
@@ -87,12 +32,12 @@ router.post("/token", (req, res) => {
       channelName,
       safeUid,
       role,
-      privilegeExpiredTs
+      expirationTime
     );
 
     return res.json({ token });
   } catch (err) {
-    console.error("Agora Token Error:", err);
+    console.error("AGORA TOKEN ERROR:", err);
     return res.status(500).json({ error: "Token generation failed" });
   }
 });

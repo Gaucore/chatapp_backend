@@ -28,7 +28,6 @@
   app.use("/api/auth", authRoutes);
 
   app.use("/agora", agoraRoutes);
-
   // =======================
   // USER ROUTES
   // =======================
