@@ -313,15 +313,6 @@ const socketServer = (server) => {
     });
 
 
-    // ❌ REJECT CALL
-    socket.on("call-ended", ({ to }) => {
-        const receiverSocket = onlineUsers.get(to);
-
-        if (receiverSocket) {
-          io.to(receiverSocket).emit("call-ended");
-        }
-      });
-
       socket.on("reject-call", ({ to }) => {
         const receiverSocket = onlineUsers.get(to);
 
