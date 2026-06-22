@@ -110,10 +110,13 @@ export const deleteMessage = async (req, res) => {
       lastMessage: lastMsg ? lastMsg._id : null,
     });
 
-    // 🔥 ONLY notify that user (NOT whole chat)
-    global.io.to(req.user._id.toString()).emit("message-deleted", {
-      messageId,
-    });
+      const socketId =global.onlineUsers.get(req.user._id.toString());
+
+      if (socketId) {
+        global.io.to(socketId).emit("message-deleted", {
+          messageId,
+        });
+      }
 
     res.json({
       success: true,

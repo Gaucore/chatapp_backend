@@ -230,8 +230,9 @@ const socketServer = (server) => {
     ========================= */
     socket.on("user-online", async (userId) => {
       if (!userId) return;
-
+      
       onlineUsers.set(userId.toString(), socket.id);
+      socket.join(userId.toString());
 
       io.emit("online-users", [...onlineUsers.keys()]);
 
@@ -257,11 +258,11 @@ const socketServer = (server) => {
       socket.to(message.chat).emit("receive-message", message);
     });
 
-    socket.on("delete-message", ({ chatId, messageId }) => {
-      if (!chatId || !messageId) return;
+    // socket.on("delete-message", ({ chatId, messageId }) => {
+    //   if (!chatId || !messageId) return;
 
-      socket.to(chatId).emit("message-deleted", { messageId });
-    });
+    //   socket.to(chatId).emit("message-deleted", { messageId });
+    // });
 
     /* =========================
        CALL SYSTEM (WEBRTC)
