@@ -1,30 +1,50 @@
 import express from "express";
-import { RtcTokenBuilder, RtcRole } from "agora-access-token";
+import pkg from "agora-access-token";
+import dotenv from "dotenv";
+
+dotenv.config();
 
 const router = express.Router();
 
-const APP_ID = "ab994c07eee7434887a63166f8afcf40";
-const APP_CERTIFICATE = "316500e2c6dc400c9472e2e2831d95df";
+const { RtcTokenBuilder, RtcRole } = pkg;
+
+// 🔥 NOW FROM ENV (SAFE)
+const APP_ID = process.env.AGORA_APP_ID;
+const APP_CERTIFICATE = process.env.AGORA_APP_CERTIFICATE;
 
 router.post("/token", (req, res) => {
-  const { channelName, uid } = req.body;
+  try {
+    const { channelName, uid } = req.body;
 
-  const role = RtcRole.PUBLISHER;
+    if (!channelName || !uid) {
+      return res.status(400).json({
+        error: "channelName and uid are required",
+      });
+    }
 
-  const expirationTimeInSeconds = 3600;
-  const currentTimestamp = Math.floor(Date.now() / 1000);
-  const privilegeExpiredTs = currentTimestamp + expirationTimeInSeconds;
+    const role = RtcRole.PUBLISHER;
 
-  const token = RtcTokenBuilder.buildTokenWithUid(
-    APP_ID,
-    APP_CERTIFICATE,
-    channelName,
-    uid,
-    role,
-    privilegeExpiredTs
-  );
+    const expirationTimeInSeconds = 3600;
+    const currentTimestamp = Math.floor(Date.now() / 1000);
+    const privilegeExpiredTs =
+      currentTimestamp + expirationTimeInSeconds;
 
-  res.json({ token });
+    const token = RtcTokenBuilder.buildTokenWithUid(
+      APP_ID,
+      APP_CERTIFICATE,
+      channelName,
+      uid,
+      role,
+      privilegeExpiredTs
+    );
+
+    return res.json({ token });
+  } catch (error) {
+    console.error("Agora Token Error:", error);
+    return res.status(500).json({
+      error: "Failed to generate Agora token",
+    });
+  }
 });
 
 export default router;
