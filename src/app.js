@@ -12,6 +12,8 @@ import notificationRoutes from "./routes/notificationRoutes.js";
 import uploadRoutes from "./routes/uploadRoutes.js";
 import callRoutes from "./routes/callRoutes.js";
 
+import agoraRoutes from "./routes/agoraRoutes.js";
+
 
 
 const app = express();
@@ -23,6 +25,8 @@ app.use(express.json());
 // AUTH ROUTES
 // =======================
 app.use("/api/auth", authRoutes);
+
+app.use("/agora", agoraRoutes);
 
 // =======================
 // USER ROUTES
