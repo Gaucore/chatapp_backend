@@ -304,22 +304,29 @@ const socketServer = (server) => {
     });
 
     // ❌ END CALL
-    socket.on("call-ended", ({ to }) => {
+   socket.on("call-ended", ({ to }) => {
       const receiverSocket = onlineUsers.get(to);
 
+      // send to receiver
       if (receiverSocket) {
         io.to(receiverSocket).emit("call-ended");
       }
+
+      // ✅ ALSO send back to sender (IMPORTANT FIX)
+      io.to(socket.id).emit("call-ended");
     });
 
 
       socket.on("reject-call", ({ to }) => {
-        const receiverSocket = onlineUsers.get(to);
+      const receiverSocket = onlineUsers.get(to);
 
-        if (receiverSocket) {
-          io.to(receiverSocket).emit("call-rejected");
-        }
-      });
+      if (receiverSocket) {
+        io.to(receiverSocket).emit("call-rejected");
+      }
+
+      // optional safety
+      io.to(socket.id).emit("call-rejected");
+    });
 
     /* =========================
        NOTIFICATIONS
