@@ -269,7 +269,9 @@ const socketServer = (server) => {
     ========================= */
 
     // 📞 START CALL
-    socket.on("call-user", ({ to, from, offer, callType }) => {
+    socket.on("call-user", ({ to, from, offer, callType,channel }) => {
+
+       console.log("CALL USER EVENT");
       const receiverSocket = onlineUsers.get(to);
 
       if (receiverSocket) {
@@ -277,6 +279,7 @@ const socketServer = (server) => {
           from,
           offer,
           callType,
+           channel, 
         });
       }
     });
